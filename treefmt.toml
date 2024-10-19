@@ -9,4 +9,5 @@ includes = ["*.nix"]
 
 [formatter.rust]
 command = "rustfmt"
+options = ["--edition", "2021"]
 includes = ["*.rs"]
