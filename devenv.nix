@@ -8,7 +8,8 @@
 
   packages = with pkgs; [
     bacon
-    cargo-audit
+    cargo-audit # vulnerabilities
+    cargo-expand # macro expansion
     cargo-tarpaulin # code coverage
     cargo-watch
   ];
