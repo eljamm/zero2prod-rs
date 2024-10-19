@@ -9,5 +9,12 @@ target/
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 
+# Nix
+.devenv*
+.direnv*
+
 # Tools
 .bacon-locations
+
+# pre-commit
+.pre-commit-config.yaml
