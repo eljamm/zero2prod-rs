@@ -12,6 +12,7 @@
     cargo-expand # macro expansion
     cargo-tarpaulin # code coverage
     cargo-watch
+    openssl
   ];
 
   cachix.enable = false;
