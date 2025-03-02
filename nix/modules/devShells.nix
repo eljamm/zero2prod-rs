@@ -16,10 +16,15 @@
         ];
 
         packages = with pkgs; [
+          # tools
           cargo-auditable
           cargo-tarpaulin # code coverage
           cargo-udeps # unused deps
           bacon
+
+          # dependencies
+          openssl
+          pkg-config
         ];
       };
     };
