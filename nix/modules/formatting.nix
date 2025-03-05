@@ -14,6 +14,7 @@
           nixfmt.enable = true;
           prettier.enable = true;
           rustfmt.enable = true;
+          rustfmt.edition = "2024";
           taplo.enable = true; # TOML
           yamlfmt.enable = true;
         };
