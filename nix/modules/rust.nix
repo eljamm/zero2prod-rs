@@ -32,7 +32,7 @@
 
       devShells.rust = pkgs.mkShell {
         packages = [
-          self'.legacyPackages.rust.toolchains.nightly
+          self'.legacyPackages.rust.toolchains.stable
         ];
       };
     };

@@ -6,6 +6,14 @@
       pkgs,
       ...
     }:
+    let
+      nightly = self'.legacyPackages.rust.toolchains.nightly;
+      cargo-udeps' = pkgs.writeShellScriptBin "cargo-udeps" ''
+        export RUSTC="${nightly}/bin/rustc";
+        export CARGO="${nightly}/bin/cargo";
+        exec "${pkgs.cargo-udeps}/bin/cargo-udeps" "$@"
+      '';
+    in
     {
       devShells.default = pkgs.mkShell {
         inputsFrom = [
@@ -20,7 +28,7 @@
           cargo-auditable
           cargo-expand # macro expansion
           cargo-tarpaulin # code coverage
-          cargo-udeps # unused deps
+          cargo-udeps' # unused deps
           bacon
 
           # dependencies
