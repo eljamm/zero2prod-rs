@@ -18,6 +18,7 @@
         packages = with pkgs; [
           # tools
           cargo-auditable
+          cargo-expand # macro expansion
           cargo-tarpaulin # code coverage
           cargo-udeps # unused deps
           bacon
