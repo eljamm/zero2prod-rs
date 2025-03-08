@@ -37,6 +37,7 @@
           pkg-config
           postgresql
           sqlx-cli
+          rainfrog # postgres tui
         ];
       };
     };

@@ -18,6 +18,10 @@
           # Nix
           nbb = "nix build --show-trace --print-build-logs";
           nrr = "nix run --show-trace --print-build-logs";
+
+          # PostgreSQL
+          startdb = "pg_ctl -D \"\${1-postgres}\" start";
+          stopdb = "pg_ctl -D \"\${1-postgres}\" stop";
         };
       };
     };
