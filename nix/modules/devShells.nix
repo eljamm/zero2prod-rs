@@ -35,6 +35,8 @@
           # dependencies
           openssl
           pkg-config
+          postgresql
+          sqlx-cli
         ];
       };
     };

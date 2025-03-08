@@ -1,3 +1,5 @@
+postgres/
+
 ## Rust ##
 # compiled files and executables
 debug/
