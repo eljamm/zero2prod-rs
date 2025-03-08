@@ -26,6 +26,7 @@
         packages = with pkgs; [
           # tools
           cargo-auditable
+          cargo-deny # scan vulnerabilities
           cargo-expand # macro expansion
           cargo-tarpaulin # code coverage
           cargo-udeps' # unused deps
