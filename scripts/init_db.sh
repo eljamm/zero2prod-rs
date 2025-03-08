@@ -32,6 +32,11 @@ if ! pg_isready -q -h "$PGDATA"; then
     pg_ctl -D "$PGDATA" start
 fi
 
+>&2 echo "Postgres is up and running on port ${DB_PORT} - running migrations now!"
+
 sqlx database create
+sqlx migrate run
+
+>&2 echo "Postgres has been migrated, ready to go!"
 
 pg_ctl -D "$PGDATA" stop
