@@ -27,7 +27,8 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Nix
-        uses: cachix/install-nix-action@v27
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: Swatinem/rust-cache@v2
       - uses: nix-community/cache-nix-action@v6
         with:
           # restore and save a cache using this key
