@@ -11,7 +11,11 @@ DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 DB_HOST="${POSTGRES_HOST:=localhost}"
 
-if [[ ! -d "$PGDATA" ]]; then
+db_is_ready() {
+    pg_isready -q -h "$DB_HOST" -p "$DB_PORT"
+}
+
+if ! db_is_ready && [[ ! -d "$PGDATA" ]]; then
     # If the data directory doesn't exist, create an empty one, and...
     initdb
     # ...configure it to listen on the Unix socket & address, and...
@@ -26,11 +30,11 @@ if [[ ! -d "$PGDATA" ]]; then
     echo "CREATE DATABASE $DB_NAME WITH OWNER $DB_USER;" | postgres --single -E postgres
 fi
 
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?host=$PGDATA"
-
-if ! pg_isready -q -h "$PGDATA"; then
+if ! db_is_ready && [[ -d "$PGDATA" ]]; then
     pg_ctl -D "$PGDATA" start
 fi
+
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
 >&2 echo "Postgres is up and running on port ${DB_PORT} - running migrations now!"
 
