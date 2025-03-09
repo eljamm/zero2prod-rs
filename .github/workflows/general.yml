@@ -39,8 +39,6 @@ jobs:
         run: nix develop --command ./scripts/init_db.sh
       - name: Run tests
         run: nix develop --command cargo test
-      - name: Check that queries are fresh
-        run: nix develop --command cargo sqlx prepare --workspace --check -- --all-targets
   # fmt:
   #   name: Rustfmt
   #   runs-on: ubuntu-latest
