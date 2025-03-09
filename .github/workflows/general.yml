@@ -2,55 +2,114 @@ name: Rust
 on: [push, pull_request]
 env:
   CARGO_TERM_COLOR: always
+  SQLX_VERSION: 0.8.2
+  SQLX_FEATURES: "rustls,postgres"
+  APP_USER: app
+  APP_USER_PWD: secret
+  APP_DB_NAME: newsletter
 permissions: {}
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository code
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
       - uses: Swatinem/rust-cache@v2
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Migrate database
+        run: nix develop --command ./scripts/init_db.sh
       - name: Run tests
-        run: cargo test
+        run: nix develop --command cargo test
   fmt:
-    name: Rustfmt
+    name: Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
         with:
-          components: rustfmt
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
       - name: Enforce formatting
-        run: cargo fmt --check
+        run: nix develop --command treefmt --ci
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
         with:
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Migrate database
+        run: nix develop --command ./scripts/init_db.sh
       - name: Linting
-        run: cargo clippy -- -D warnings
+        run: nix develop --command cargo clippy -- -D warnings
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin
-      options: --security-opt seccomp=unconfined
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Migrate database
+        run: nix develop --command ./scripts/init_db.sh
       - name: Generate code coverage
-        run: |-
-          cargo tarpaulin --verbose --workspace
+        run: nix develop --command cargo tarpaulin --verbose --workspace
