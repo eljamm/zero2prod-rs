@@ -80,6 +80,8 @@ jobs:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
           # if there's no cache hit, restore a cache by this prefix
           restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Migrate database
+        run: nix develop --command ./scripts/init_db.sh
       - name: Linting
         run: nix develop --command cargo clippy -- -D warnings
   coverage:
@@ -107,5 +109,7 @@ jobs:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
           # if there's no cache hit, restore a cache by this prefix
           restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Migrate database
+        run: nix develop --command ./scripts/init_db.sh
       - name: Generate code coverage
         run: nix develop --command cargo tarpaulin --verbose --workspace
