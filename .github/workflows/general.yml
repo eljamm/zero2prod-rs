@@ -39,49 +39,63 @@ jobs:
         run: nix develop --command ./scripts/init_db.sh
       - name: Run tests
         run: nix develop --command cargo test
-  # fmt:
-  #   name: Rustfmt
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         persist-credentials: false
-  #     - name: Install Nix
-  #       uses: nixbuild/nix-quick-install-action@v30
-  #     - name: Enforce formatting
-  #       run: nix develop --command cargo fmt --check
-  #       run: nix develop --command treefmt --ci
-  # clippy:
-  #   name: Clippy
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     # This environment variable forces sqlx to use its offline mode,
-  #     # which means that it will not attempt to connect to a database
-  #     # when running the tests. It'll instead use the cached query results.
-  #     # We check that the cached query results are up-to-date in another job,
-  #     # to speed up the overall CI pipeline.
-  #     # This will all be covered in detail in chapter 5.
-  #     SQLX_OFFLINE: true
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         persist-credentials: false
-  #     - name: Install Nix
-  #       uses: nixbuild/nix-quick-install-action@v30
-  #     - name: Linting
-  #       run: nix develop --command cargo clippy -- -D warnings
-  # coverage:
-  #   name: Code coverage
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: xd009642/tarpaulin
-  #     options: --security-opt seccomp=unconfined
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         persist-credentials: false
-  #     - name: Install Nix
-  #       uses: nixbuild/nix-quick-install-action@v30
-  #     - name: Generate code coverage
-  #       run: nix develop --command cargo tarpaulin --verbose --workspace
+  fmt:
+    name: Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Enforce formatting
+        run: nix develop --command treefmt --ci
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    env:
+      # This environment variable forces sqlx to use its offline mode,
+      # which means that it will not attempt to connect to a database
+      # when running the tests. It'll instead use the cached query results.
+      # We check that the cached query results are up-to-date in another job,
+      # to speed up the overall CI pipeline.
+      # This will all be covered in detail in chapter 5.
+      SQLX_OFFLINE: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Linting
+        run: nix develop --command cargo clippy -- -D warnings
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      - name: Generate code coverage
+        run: nix develop --command cargo tarpaulin --verbose --workspace
