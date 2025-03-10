@@ -2,7 +2,7 @@
   perSystem =
     { pkgs, devLib, ... }:
     {
-      devShells.aliases = pkgs.mkShell {
+      devShells.aliases = pkgs.mkShellNoCC {
         packages = devLib.mkAliases {
           # Explain `rustc` errors with markdown formatting
           rexp = {

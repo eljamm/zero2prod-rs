@@ -6,15 +6,18 @@
   ];
 
   perSystem =
-    { pkgs, lib, ... }:
+    { self', ... }:
     {
       treefmt.config = {
         projectRootFile = "flake.nix";
         programs = {
           nixfmt.enable = true;
           prettier.enable = true;
-          rustfmt.enable = true;
-          rustfmt.edition = "2024";
+          rustfmt = {
+            enable = true;
+            edition = "2024";
+            package = self'.legacyPackages.rust.toolchain.availableComponents.rustfmt;
+          };
           taplo.enable = true; # TOML
           yamlfmt.enable = true;
         };

@@ -28,11 +28,13 @@
         toolchains.nightly = pkgs.rust-bin.selectLatestNightlyWith (
           toolchain: toolchain.minimal.override { inherit extensions; }
         );
+
+        toolchain = toolchains.stable;
       };
 
-      devShells.rust = pkgs.mkShell {
+      devShells.rust = pkgs.mkShellNoCC {
         packages = [
-          self'.legacyPackages.rust.toolchains.stable
+          self'.legacyPackages.rust.toolchain
         ];
       };
     };
