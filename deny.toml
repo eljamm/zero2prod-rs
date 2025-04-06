@@ -4,8 +4,4 @@
 [advisories]
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
-ignore = [
-  # paste - no longer maintained
-  # https://github.com/actix/actix-net/issues/648
-  { id = "RUSTSEC-2024-0436", reason = "actix depends on paste which is no longer maintained, so ignore for now until this is fixed in order to to make the CI checks pass" },
-]
+ignore = []
