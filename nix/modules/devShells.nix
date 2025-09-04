@@ -47,9 +47,11 @@
             (pkgs.rust-bin.stable.latest.minimal.override {
               extensions = [
                 "clippy"
+                "llvm-tools-preview"
               ];
             })
             cargo-tarpaulin # code coverage
+            cargo-llvm-cov
           ]
           ++ dependencies;
       };
