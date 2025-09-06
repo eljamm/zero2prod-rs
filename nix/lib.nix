@@ -1,32 +1,23 @@
 {
   lib,
-  craneLib,
-  callPackage,
   writeShellApplication,
   ...
 }:
 rec {
-  inherit craneLib;
-
-  callCrate = file: attrs: callPackage file { inherit craneLib crateInfo; } // attrs;
-
-  # src -> { `pname`, `version` }
-  crateInfo = src: craneLib.crateNameFromCargoToml { cargoToml = "${src}/Cargo.toml"; };
-
   attrsToApp =
-    attrs:
-    (writeShellApplication {
-      name = attrs.name;
-      text = if (lib.isAttrs attrs.value) then attrs.value.text else attrs.value + " \"$@\"";
-      runtimeInputs = if (lib.isAttrs attrs.value) then attrs.value.runtimeInputs or [ ] else [ ];
-    });
-  mkApp = attrs: {
-    name = attrs.name;
-    value = {
-      type = "app";
-      program = attrsToApp attrs;
+    name: value:
+    writeShellApplication {
+      inherit name;
+      text = value.text or (value + " \"$@\"");
+      runtimeInputs = value.runtimeInputs or [ ];
     };
-  };
-  mkAliases = aliases: map attrsToApp (lib.attrsToList aliases);
-  mkApps = apps: lib.listToAttrs (lib.map mkApp (lib.attrsToList apps));
+
+  mkAliases = aliases: lib.attrValues (lib.mapAttrs attrsToApp aliases);
+
+  mkApps =
+    apps:
+    lib.mapAttrs (name: value: {
+      type = "app";
+      program = attrsToApp name value;
+    }) apps;
 }

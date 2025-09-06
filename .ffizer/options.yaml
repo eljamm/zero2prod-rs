@@ -1,0 +1,23 @@
+variables:
+- name: nixpkgs_version
+  default_value: unstable
+- name: nixpkgs_version__idx
+  default_value: 1
+- name: nixpkgs_version__label
+  default_value: Unstable
+- name: template_name
+  default_value: rust
+- name: template_name__idx
+  default_value: 1
+- name: template_name__label
+  default_value: rust
+- name: toolchain
+  default_value: nightly
+- name: toolchain__idx
+  default_value: 1
+- name: toolchain__label
+  default_value: Nightly
+sources:
+- uri: /tmp/ffizer-rust/templates/rust
+  rev: master
+  subfolder: null

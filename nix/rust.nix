@@ -1,0 +1,122 @@
+{
+  devShells,
+  devLib,
+  pkgs,
+  ...
+}@args:
+rec {
+  crates = import ./crates args;
+
+  packages = with pkgs; rec {
+    default = [
+      toolchains.default
+      cargo-auditable
+    ]
+    ++ deps;
+
+    deps = [
+      openssl
+      pkg-config
+      postgresql
+      sqlx-cli
+    ];
+
+    dev = [
+      bacon
+      cargo-deny # scan vulnerabilities
+      cargo-expand # macro expansion
+      cargo-tarpaulin # code coverage
+      cargo-udeps # unused deps
+      rainfrog # postgres tui
+    ]
+    ++ default
+    ++ aliases
+    ++ devShells.default.nativeBuildInputs;
+
+    ci = [
+      toolchains.ci
+      cargo-llvm-cov
+      cargo-tarpaulin # code coverage
+    ]
+    ++ deps;
+
+    aliases = devLib.mkAliases {
+      # Explain `rustc` errors with markdown formatting
+      rexp = {
+        text = ''rustc --explain "$1" | sed '/^```/{s//&rust/;:a;n;//!ba}' | rich -m -'';
+        runtimeInputs = [ pkgs.rich-cli ];
+      };
+
+      # Cargo
+      bb = "cargo build";
+      br = "cargo run";
+      bt = "cargo test";
+
+      # Nix
+      nbb = "nix build --show-trace --print-build-logs";
+      nrr = "nix run --show-trace --print-build-logs";
+
+      # PostgreSQL
+      startdb = "pg_ctl -D \"\${1-postgres}\" start";
+      stopdb = "pg_ctl -D \"\${1-postgres}\" stop";
+    };
+  };
+
+  apps = devLib.mkApps {
+    # scan vulnerabilities:
+    # nix run .#audit
+    audit = ''
+      ${pkgs.cargo-deny}/bin/cargo-deny check advisories
+    '';
+  };
+
+  shells = {
+    dev = pkgs.mkShellNoCC {
+      packages = packages.dev;
+    };
+
+    ci = pkgs.mkShellNoCC {
+      packages = packages.ci;
+    };
+
+    # nix develop .#udeps --command cargo udeps --all-targets
+    udeps = pkgs.mkShellNoCC {
+      packages =
+        let
+          cargo-udeps' = pkgs.writeShellScriptBin "cargo-udeps" ''
+            export RUSTC="${toolchains.nightly}/bin/rustc";
+            export CARGO="${toolchains.nightly}/bin/cargo";
+            exec "${pkgs.cargo-udeps}/bin/cargo-udeps" "$@"
+          '';
+        in
+        [
+          cargo-udeps' # unused deps
+        ]
+        ++ packages.deps;
+    };
+  };
+
+  extensions = {
+    default = [
+      "cargo"
+      "clippy"
+      "rust-src"
+      "rustc"
+      "rustfmt"
+      "rust-analyzer"
+    ];
+    ci = [
+      "clippy"
+      "llvm-tools-preview"
+    ];
+  };
+
+  toolchains = {
+    default = toolchains.stable;
+    ci = toolchains.default.override { extensions = extensions.default; };
+    stable = pkgs.rust-bin.stable.latest.minimal.override { extensions = extensions.default; };
+    nightly = pkgs.rust-bin.selectLatestNightlyWith (
+      toolchain: toolchain.minimal.override { extensions = extensions.default; }
+    );
+  };
+}
