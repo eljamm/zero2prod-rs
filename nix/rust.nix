@@ -40,26 +40,36 @@ rec {
     ]
     ++ deps;
 
-    aliases = devLib.mkAliases {
-      # Explain `rustc` errors with markdown formatting
-      rexp = {
-        text = ''rustc --explain "$1" | sed '/^```/{s//&rust/;:a;n;//!ba}' | rich -m -'';
-        runtimeInputs = [ pkgs.rich-cli ];
+    aliases =
+      let
+        # PostgreSQL
+        startdb = "pg_ctl -D \"\${1-postgres}\" start";
+        stopdb = "pg_ctl -D \"\${1-postgres}\" stop";
+
+        db-cmd = cmd: ''
+          ${startdb}
+          ${cmd}
+          ${stopdb}
+        '';
+      in
+      devLib.mkAliases {
+        # Explain `rustc` errors with markdown formatting
+        rexp = {
+          text = ''rustc --explain "$1" | sed '/^```/{s//&rust/;:a;n;//!ba}' | rich -m -'';
+          runtimeInputs = [ pkgs.rich-cli ];
+        };
+
+        # Cargo
+        bb = db-cmd "cargo build";
+        br = db-cmd "cargo run";
+        bt = db-cmd "cargo test";
+
+        # Nix
+        nbb = "nix build --show-trace --print-build-logs";
+        nrr = "nix run --show-trace --print-build-logs";
+
+        inherit startdb stopdb;
       };
-
-      # Cargo
-      bb = "cargo build";
-      br = "cargo run";
-      bt = "cargo test";
-
-      # Nix
-      nbb = "nix build --show-trace --print-build-logs";
-      nrr = "nix run --show-trace --print-build-logs";
-
-      # PostgreSQL
-      startdb = "pg_ctl -D \"\${1-postgres}\" start";
-      stopdb = "pg_ctl -D \"\${1-postgres}\" stop";
-    };
   };
 
   apps = devLib.mkApps {
