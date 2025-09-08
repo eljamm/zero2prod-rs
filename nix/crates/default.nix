@@ -16,7 +16,6 @@ lib.makeScope pkgs.newScope (
   in
   with self;
   {
-    default = callCrate ./hello.nix { };
-    prod = callCrate ./prod.nix { };
+    default = callCrate ./prod.nix { };
   }
 )

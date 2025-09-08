@@ -12,8 +12,41 @@
   writers,
 }:
 let
-  sqlFilter = path: _type: builtins.match ".*sql$" path != null;
-  finalFilter = path: type: (sqlFilter path type) || (craneLib.filterCargoSources path type);
+  commonArgs = rec {
+    inherit (crateInfo src)
+      pname
+      version
+      ;
+
+    src =
+      let
+        sqlFilter = path: _type: builtins.match ".*sql$" path != null;
+        finalFilter = path: type: (sqlFilter path type) || (craneLib.filterCargoSources path type);
+      in
+      lib.cleanSourceWith {
+        src = ../../.;
+        filter = finalFilter;
+        name = "source";
+      };
+
+    cargoLock = "${src}/Cargo.lock";
+    strictDeps = true;
+
+    nativeBuildInputs = [
+      pkg-config
+    ];
+
+    buildInputs = [
+      openssl
+    ];
+  };
+
+  cargoArtifacts = craneLib.buildDepsOnly (
+    commonArgs
+    // {
+      pname = "${commonArgs.pname}-deps";
+    }
+  );
 
   test-config = {
     app_port = 8000;
@@ -30,61 +63,57 @@ let
     username
     password
     host
-    port
     name
     ;
 in
-rustPlatform.buildRustPackage rec {
-  inherit (crateInfo src) pname version;
+craneLib.buildPackage (
+  commonArgs
+  // rec {
+    inherit cargoArtifacts;
 
-  src = lib.cleanSourceWith {
-    src = ../../.;
-    filter = finalFilter;
-    name = "source";
-  };
+    nativeBuildInputs = [
+      pkg-config
+      postgresql
+      postgresqlTestHook
+      sqlx-cli
+    ];
 
-  cargoLock.lockFile = "${src}/Cargo.lock";
-  strictDeps = true;
+    env = {
+      DBHOST = host;
+      PGDATABASE = name;
+      PGUSER = username;
+      PGPASSWORD = password;
+      postgresqlEnableTCP = 1;
+    };
 
-  nativeBuildInputs = [
-    pkg-config
-    breakpointHook
-    postgresqlTestHook
-    postgresql
-    sqlx-cli
-  ];
+    postgresqlTestUserOptions = "LOGIN SUPERUSER";
+    postgresqlTestSetupPost = ''
+      export DATABASE_URL="postgresql://$PGUSER:$PGPASSWORD@$DBHOST/$PGDATABASE"
+    '';
 
-  buildInputs = [
-    openssl
-  ];
+    preBuild = ''
+      postgresqlStart
 
-  env = {
-    PGDATABASE = name;
-    PGUSER = username;
-    PGPASSWORD = password;
-    postgresqlEnableTCP = 1;
-  };
+      cp ${writers.writeYAML "config.yaml" test-config} config.yaml
+      cp -R ${commonArgs.src.outPath}/migrations .
 
-  postgresqlTestUserOptions = "LOGIN SUPERUSER";
-  postgresqlTestSetupPost = ''
-    export DATABASE_URL="postgresql://$PGUSER:$PGPASSWORD@${host}/$PGDATABASE"
-  '';
+      sqlx database create
+      sqlx migrate run
+    '';
 
-  preBuild = ''
-    postgresqlStart
+    postBuild = ''
+      postgresqlStop
+    '';
 
-    cp ${writers.writeYAML "config.yaml" test-config} config.yaml
-    cp -R ${src.outPath}/migrations .
+    preCheck = ''
+      rm -rf /build/postgresql
+      postgresqlStart
+      sqlx database create
+      sqlx migrate run
+    '';
 
-    sqlx database create
-    sqlx migrate run
-  '';
-
-  postBuild = ''
-    cargo test $cargoTestFlags
-
-    postgresqlStop
-  '';
-
-  doCheck = false;
-}
+    postCheck = ''
+      postgresqlStop
+    '';
+  }
+)
