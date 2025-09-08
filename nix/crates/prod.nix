@@ -3,21 +3,14 @@
   craneLib,
   crateInfo,
   pkg-config,
-  openssl,
   postgresql,
   postgresqlTestHook,
   sqlx-cli,
-  breakpointHook,
-  rustPlatform,
+  openssl,
   writers,
 }:
 let
   commonArgs = rec {
-    inherit (crateInfo src)
-      pname
-      version
-      ;
-
     src =
       let
         sqlFilter = path: _type: builtins.match ".*sql$" path != null;
@@ -41,13 +34,6 @@ let
     ];
   };
 
-  cargoArtifacts = craneLib.buildDepsOnly (
-    commonArgs
-    // {
-      pname = "${commonArgs.pname}-deps";
-    }
-  );
-
   test-config = {
     app_port = 8000;
     database = {
@@ -62,7 +48,7 @@ in
 craneLib.buildPackage (
   commonArgs
   // rec {
-    inherit cargoArtifacts;
+    cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
     nativeBuildInputs = [
       pkg-config
@@ -97,5 +83,12 @@ craneLib.buildPackage (
       skipHook=postgresqlStart
       preCheckHooks=( "''${preCheckHooks[@]/''$skipHook}" )
     '';
+
+    passthru = {
+      inherit
+        commonArgs
+        test-config
+        ;
+    };
   }
 )

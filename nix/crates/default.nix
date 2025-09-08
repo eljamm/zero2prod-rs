@@ -2,6 +2,7 @@
   lib,
   pkgs,
   inputs,
+  rust,
   ...
 }:
 lib.makeScope pkgs.newScope (
@@ -14,8 +15,9 @@ lib.makeScope pkgs.newScope (
       crateInfo = src: craneLib.crateNameFromCargoToml { cargoToml = "${src}/Cargo.toml"; };
     };
   in
-  with self;
   {
     default = callCrate ./prod.nix { };
+
+    coverage = callCrate ./cov.nix { };
   }
 )
