@@ -50,7 +50,7 @@ jobs:
           # if there's no cache hit, restore a cache by this prefix
           restore-prefixes-first-match: nix-fmt-${{ runner.os }}-
       - name: Enforce formatting
-        run: nix develop .#fmt --command treefmt --ci
+        run: nix develop --command formatter --ci
   clippy:
     name: Clippy
     runs-on: ubuntu-latest

@@ -39,7 +39,7 @@ let
       if [[ -d .git ]]; then
         shell-hook
       fi
-      treefmt
+      treefmt "$@"
     '';
   };
 in
