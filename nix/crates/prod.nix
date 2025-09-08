@@ -58,13 +58,6 @@ let
       password = "password";
     };
   };
-
-  inherit (test-config.database)
-    username
-    password
-    host
-    name
-    ;
 in
 craneLib.buildPackage (
   commonArgs
@@ -78,7 +71,7 @@ craneLib.buildPackage (
       sqlx-cli
     ];
 
-    env = {
+    env = with test-config.database; {
       DBHOST = host;
       PGDATABASE = name;
       PGUSER = username;
@@ -99,21 +92,10 @@ craneLib.buildPackage (
 
       sqlx database create
       sqlx migrate run
-    '';
 
-    postBuild = ''
-      postgresqlStop
-    '';
-
-    preCheck = ''
-      rm -rf /build/postgresql
-      postgresqlStart
-      sqlx database create
-      sqlx migrate run
-    '';
-
-    postCheck = ''
-      postgresqlStop
+      # Don't attempt to start the database again in the check hook.
+      skipHook=postgresqlStart
+      preCheckHooks=( "''${preCheckHooks[@]/''$skipHook}" )
     '';
   }
 )
