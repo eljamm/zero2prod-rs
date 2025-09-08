@@ -1,4 +1,6 @@
 postgres/
+coverage/
+lcov.info
 
 ## Rust ##
 # compiled files and executables
