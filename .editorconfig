@@ -9,8 +9,12 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{md,json,yaml}]
+[*.md]
 indent_size = 2
 
 [*.nix]
 indent_size = 2
+
+[*.{yaml,yml}]
+indent_size = 2
+quote_type="double"

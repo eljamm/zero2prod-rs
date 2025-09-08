@@ -19,6 +19,7 @@ let
       package = args.rust.toolchains.default.availableComponents.rustfmt;
     };
     programs.taplo.enable = true; # TOML
+    programs.yamlfmt.enable = true;
   };
 
   pre-commit-hook = pkgs.writeShellScriptBin "git-hooks" ''
