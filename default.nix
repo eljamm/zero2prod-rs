@@ -29,6 +29,7 @@ let
       inputs
       ;
     inherit (default)
+      formatter
       packages
       rust
       ;
@@ -40,20 +41,12 @@ let
     formatter = import ./nix/formatter.nix args;
     rust = import ./nix/rust.nix args;
 
+    legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
     packages = rust.crates // {
       saveFromGC = import ./nix/saveFromGC.nix args;
     };
-    legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
 
-    shells = {
-      default = pkgs.mkShellNoCC {
-        packages = [
-          formatter
-        ];
-      };
-    }
-    // rust.shells or { };
-
+    inherit (rust) shells;
     inherit flake;
   };
 

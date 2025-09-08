@@ -1,6 +1,7 @@
 {
-  devShells,
   devLib,
+  devShells,
+  formatter,
   pkgs,
   ...
 }@args:
@@ -31,8 +32,7 @@ rec {
       rainfrog # postgres tui
     ]
     ++ default
-    ++ aliases
-    ++ devShells.default.nativeBuildInputs;
+    ++ aliases;
 
     ci = [
       toolchains.default
@@ -81,8 +81,11 @@ rec {
   };
 
   shells = {
-    dev = pkgs.mkShellNoCC {
-      packages = packages.dev;
+    default = pkgs.mkShellNoCC {
+      packages = [
+        formatter
+      ]
+      ++ packages.dev;
     };
 
     ci = pkgs.mkShellNoCC {
