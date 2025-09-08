@@ -25,6 +25,7 @@ rec {
       bacon
       cargo-deny # scan vulnerabilities
       cargo-expand # macro expansion
+      cargo-llvm-cov
       cargo-tarpaulin # code coverage
       cargo-udeps # unused deps
       rainfrog # postgres tui
@@ -34,9 +35,8 @@ rec {
     ++ devShells.default.nativeBuildInputs;
 
     ci = [
-      toolchains.ci
+      toolchains.default
       cargo-llvm-cov
-      cargo-tarpaulin # code coverage
     ]
     ++ deps;
 
@@ -114,16 +114,12 @@ rec {
       "rustc"
       "rustfmt"
       "rust-analyzer"
-    ];
-    ci = [
-      "clippy"
       "llvm-tools-preview"
     ];
   };
 
   toolchains = {
     default = toolchains.stable;
-    ci = toolchains.default.override { extensions = extensions.default; };
     stable = pkgs.rust-bin.stable.latest.minimal.override { extensions = extensions.default; };
     nightly = pkgs.rust-bin.selectLatestNightlyWith (
       toolchain: toolchain.minimal.override { extensions = extensions.default; }
