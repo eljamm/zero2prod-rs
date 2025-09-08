@@ -11,6 +11,9 @@
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     git-hooks.url = "github:fricklerhandwerk/git-hooks";
     git-hooks.flake = false;
+
+    cache-nix-action.inputs.nixpkgs.follows = "nixpkgs";
+    cache-nix-action.url = "github:nix-community/cache-nix-action";
   };
 
   outputs =

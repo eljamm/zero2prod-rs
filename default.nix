@@ -40,7 +40,9 @@ let
     formatter = import ./nix/formatter.nix args;
     rust = import ./nix/rust.nix args;
 
-    packages = rust.crates;
+    packages = rust.crates // {
+      saveFromGC = import ./nix/saveFromGC.nix args;
+    };
     legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
 
     shells = {
