@@ -36,9 +36,8 @@ let
     devShells = default.shells;
   };
 
-  formatter = import ./nix/formatter.nix args;
-
   default = rec {
+    formatter = import ./nix/formatter.nix args;
     rust = import ./nix/rust.nix args;
 
     packages = rust.crates;
