@@ -1,8 +1,7 @@
 {
-  devLib,
-  devShells,
-  formatter,
   pkgs,
+  devLib,
+  formatter,
   ...
 }@args:
 rec {

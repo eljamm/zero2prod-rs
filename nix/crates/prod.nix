@@ -1,7 +1,6 @@
 {
   lib,
   craneLib,
-  crateInfo,
   pkg-config,
   postgresql,
   postgresqlTestHook,
@@ -47,7 +46,7 @@ let
 in
 craneLib.buildPackage (
   commonArgs
-  // rec {
+  // {
     cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
     nativeBuildInputs = [
