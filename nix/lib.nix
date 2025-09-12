@@ -1,6 +1,10 @@
 {
   lib,
   writeShellApplication,
+
+  mkShell,
+  useMoldLinker,
+  gccStdenv,
   ...
 }:
 rec {
@@ -20,4 +24,10 @@ rec {
       type = "app";
       program = attrsToApp name value;
     }) apps;
+
+  mkShellMold =
+    attrs:
+    mkShell.override {
+      stdenv = useMoldLinker gccStdenv;
+    } attrs;
 }

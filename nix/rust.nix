@@ -80,7 +80,7 @@ rec {
   };
 
   shells = {
-    default = pkgs.mkShellNoCC {
+    default = devLib.mkShellMold {
       packages = [
         formatter
         pkgs.pinact # pin GH actions
@@ -88,7 +88,7 @@ rec {
       ++ packages.dev;
     };
 
-    ci = pkgs.mkShellNoCC {
+    ci = devLib.mkShellMold {
       packages = packages.ci;
     };
 
