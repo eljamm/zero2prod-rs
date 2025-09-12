@@ -9,39 +9,28 @@ let
   git-hooks = import inputs.git-hooks { inherit system; };
   treefmt-nix = import inputs.treefmt-nix;
 
-  treefmt = treefmt-nix.mkWrapper pkgs {
+  treefmt-cfg = {
     projectRootFile = "default.nix";
     programs.nixfmt.enable = true;
     programs.actionlint.enable = true;
+    programs.zizmor.enable = true;
     programs.rustfmt = {
       enable = true;
       edition = "2024";
       package = args.rust.toolchains.default.availableComponents.rustfmt;
     };
     programs.taplo.enable = true; # TOML
-    programs.yamlfmt.enable = true;
   };
-
+  treefmt = treefmt-nix.mkWrapper pkgs treefmt-cfg;
+  treefmt-pkgs = (treefmt-nix.evalModule pkgs treefmt-cfg).config.build.devShell.nativeBuildInputs;
+in
+{
   pre-commit-hook = pkgs.writeShellScriptBin "git-hooks" ''
     if [[ -d .git ]]; then
       ${with git-hooks.lib.git-hooks; pre-commit (wrap.abort-on-change treefmt)}
     fi
   '';
 
-  formatter = pkgs.writeShellApplication {
-    name = "formatter";
-    runtimeInputs = [ treefmt ];
-    text = ''
-      # shellcheck disable=all
-      shell-hook () {
-        ${lib.getExe pre-commit-hook}
-      }
-
-      if [[ -d .git ]]; then
-        shell-hook
-      fi
-      treefmt "$@"
-    '';
-  };
-in
-formatter
+  formatter = treefmt;
+  formatter-pkgs = treefmt-pkgs;
+}

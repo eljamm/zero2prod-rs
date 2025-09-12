@@ -1,7 +1,7 @@
 {
   pkgs,
   devLib,
-  formatter,
+  format,
   ...
 }@args:
 rec {
@@ -67,6 +67,8 @@ rec {
         nbb = "nix build --show-trace --print-build-logs";
         nrr = "nix run --show-trace --print-build-logs";
 
+        fmt = format.formatter;
+
         inherit startdb stopdb;
       };
   };
@@ -82,7 +84,7 @@ rec {
   shells = {
     default = devLib.mkShellMold {
       packages = [
-        formatter
+        format.formatter
         pkgs.pinact # pin GH actions
       ]
       ++ packages.dev;

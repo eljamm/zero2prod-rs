@@ -21,7 +21,7 @@ let
       inputs
       ;
     inherit (default)
-      formatter
+      format
       packages
       rust
       ;
@@ -30,7 +30,7 @@ let
   };
 
   default = {
-    formatter = import ./nix/formatter.nix args;
+    format = import ./nix/formatter.nix args;
     rust = import ./nix/rust.nix args;
 
     legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
@@ -43,10 +43,8 @@ let
   };
 
   flake = {
-    inherit (default)
-      formatter
-      legacyPackages
-      ;
+    inherit (default) legacyPackages;
+    inherit (default.format) formatter;
     inherit (default.rust) apps;
     devShells = default.shells;
     packages = lib.filterAttrs (n: v: lib.isDerivation v) default.packages;
