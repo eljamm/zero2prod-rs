@@ -13,6 +13,9 @@ lib.makeScope pkgs.newScope (
 
       # src -> { `pname`, `version` }
       crateInfo = src: craneLib.crateNameFromCargoToml { cargoToml = "${src}/Cargo.toml"; };
+
+      # use mold linker
+      stdenv = p: p.stdenvAdapters.useMoldLinker self.clangStdenv;
     };
   in
   {
