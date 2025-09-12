@@ -83,6 +83,7 @@ rec {
     default = pkgs.mkShellNoCC {
       packages = [
         formatter
+        pkgs.pinact # pin GH actions
       ]
       ++ packages.dev;
     };
