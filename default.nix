@@ -29,16 +29,16 @@ let
     devShells = default.shells;
   };
 
-  default = rec {
+  default = {
     formatter = import ./nix/formatter.nix args;
     rust = import ./nix/rust.nix args;
 
     legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
-    packages = rust.crates // {
+    packages = default.rust.crates // {
       saveFromGC = import ./nix/utils/saveFromGC.nix args;
     };
 
-    inherit (rust) shells;
+    inherit (default.rust) shells;
     inherit flake;
   };
 
