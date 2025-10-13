@@ -2,10 +2,12 @@
   pkgs,
   devLib,
   format,
+  inputs,
+  rust,
   ...
 }@args:
 rec {
-  crates = import ./crates args;
+  crates = pkgs.callPackage ./crates { inherit inputs rust; };
 
   packages = with pkgs; rec {
     default = [

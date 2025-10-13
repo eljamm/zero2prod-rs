@@ -11,8 +11,8 @@
   },
   lib ? import "${inputs.nixpkgs}/lib",
 }:
-let
-  args = {
+lib.makeScope pkgs.newScope (
+  self: with self; {
     inherit
       lib
       pkgs
@@ -20,34 +20,23 @@ let
       system
       inputs
       ;
-    inherit (default)
-      format
-      packages
-      rust
-      ;
-    devLib = default.legacyPackages.lib;
-    devShells = default.shells;
-  };
 
-  default = {
-    format = import ./nix/formatter.nix args;
-    rust = import ./nix/rust.nix args;
+    devLib = callPackage ./nix/lib.nix { };
 
-    legacyPackages.lib = pkgs.callPackage ./nix/lib.nix { };
-    packages = default.rust.crates // {
-      saveFromGC = import ./nix/utils/saveFromGC.nix args;
+    format = callPackage ./nix/formatter.nix { };
+    rust = callPackage ./nix/rust.nix { };
+
+    devShells = rust.shells;
+    packages = rust.crates // {
+      saveFromGC = callPackage ./nix/utils/saveFromGC.nix { };
     };
 
-    inherit (default.rust) shells;
-    inherit flake;
-  };
-
-  flake = {
-    inherit (default) legacyPackages;
-    inherit (default.format) formatter;
-    inherit (default.rust) apps;
-    devShells = default.shells;
-    packages = lib.filterAttrs (n: v: lib.isDerivation v) default.packages;
-  };
-in
-default // args
+    flake = {
+      inherit devShells;
+      inherit (format) formatter;
+      inherit (rust) apps;
+      packages = lib.filterAttrs (n: v: lib.isDerivation v) packages;
+      legacyPackages.lib = devLib;
+    };
+  }
+)
