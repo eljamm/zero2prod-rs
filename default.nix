@@ -11,7 +11,7 @@
   },
   lib ? import "${inputs.nixpkgs}/lib",
 }:
-lib.makeScope pkgs.newScope (
+lib.makeExtensible (
   self: with self; {
     inherit
       lib
@@ -20,6 +20,8 @@ lib.makeScope pkgs.newScope (
       system
       inputs
       ;
+
+    callPackage = pkgs.newScope self;
 
     devLib = callPackage ./nix/lib.nix { };
 

@@ -1,13 +1,13 @@
 {
+  lib,
   pkgs,
   devLib,
   format,
-  inputs,
-  rust,
+  callPackage,
   ...
 }@args:
-rec {
-  crates = pkgs.callPackage ./crates { inherit inputs rust; };
+lib.makeExtensible (self: {
+  crates = callPackage ./crates { };
 
   packages = with pkgs; rec {
     default = [
@@ -89,11 +89,11 @@ rec {
         format.formatter
         pkgs.pinact # pin GH actions
       ]
-      ++ packages.dev;
+      ++ self.packages.dev;
     };
 
     ci = devLib.mkShellMold {
-      packages = packages.ci;
+      packages = self.packages.ci;
     };
 
     # nix develop .#udeps --command cargo udeps --all-targets
@@ -101,15 +101,15 @@ rec {
       packages =
         let
           cargo-udeps' = pkgs.writeShellScriptBin "cargo-udeps" ''
-            export RUSTC="${toolchains.nightly}/bin/rustc";
-            export CARGO="${toolchains.nightly}/bin/cargo";
+            export RUSTC="${self.toolchains.nightly}/bin/rustc";
+            export CARGO="${self.toolchains.nightly}/bin/cargo";
             exec "${pkgs.cargo-udeps}/bin/cargo-udeps" "$@"
           '';
         in
         [
           cargo-udeps' # unused deps
         ]
-        ++ packages.deps;
+        ++ self.packages.deps;
     };
   };
 
@@ -126,10 +126,10 @@ rec {
   };
 
   toolchains = {
-    default = toolchains.stable;
-    stable = pkgs.rust-bin.stable.latest.minimal.override { extensions = extensions.default; };
+    default = self.toolchains.stable;
+    stable = pkgs.rust-bin.stable.latest.minimal.override { extensions = self.extensions.default; };
     nightly = pkgs.rust-bin.selectLatestNightlyWith (
-      toolchain: toolchain.minimal.override { extensions = extensions.default; }
+      toolchain: toolchain.minimal.override { extensions = self.extensions.default; }
     );
   };
-}
+})
