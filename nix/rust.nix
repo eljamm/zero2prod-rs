@@ -62,12 +62,18 @@ lib.makeExtensible (self: {
 
         # Cargo
         bb = db-cmd "cargo build";
-        br = db-cmd "cargo run";
-        bt = db-cmd "cargo test";
+        rr = db-cmd "cargo run";
+        tt = db-cmd "cargo test";
 
         # Nix
-        nbb = "nix build --show-trace --print-build-logs";
-        nrr = "nix run --show-trace --print-build-logs";
+        bn.text = ''
+          crate=$1; shift
+          nix build --show-trace --print-build-logs .#"$crate" "$@"
+        '';
+        rn.text = ''
+          crate=$1; shift
+          nix run --show-trace --print-build-logs .#"$crate" "$@"
+        '';
 
         ff = format.formatter;
 
