@@ -11,7 +11,7 @@ lib.makeExtensible (self: {
 
   packages = with pkgs; rec {
     default = [
-      toolchains.default
+      self.toolchains.default
       cargo-auditable
     ]
     ++ deps;

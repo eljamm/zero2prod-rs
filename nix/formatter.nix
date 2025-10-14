@@ -3,6 +3,7 @@
   pkgs,
   inputs,
   system,
+  rust,
   ...
 }@args:
 let
@@ -17,7 +18,7 @@ let
     programs.rustfmt = {
       enable = true;
       edition = "2024";
-      package = args.rust.toolchains.default.availableComponents.rustfmt;
+      package = rust.toolchains.default.availableComponents.rustfmt;
     };
     programs.taplo.enable = true; # TOML
   };
