@@ -67,12 +67,12 @@ lib.makeExtensible (self: {
 
         # Nix
         bn.text = ''
-          crate=$1; shift
-          nix build --show-trace --print-build-logs .#"$crate" "$@"
+          package=$1; shift
+          nix build --show-trace --print-build-logs .#"$package" "$@"
         '';
         rn.text = ''
-          crate=$1; shift
-          nix run --show-trace --print-build-logs .#"$crate" "$@"
+          package=$1; shift
+          nix run --show-trace --print-build-logs .#"$package" "$@"
         '';
 
         ff = format.formatter;

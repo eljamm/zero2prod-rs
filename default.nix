@@ -1,7 +1,5 @@
 {
-  self ? import ./nix/utils/import-flake.nix {
-    src = ./.;
-  },
+  self ? import ./nix/utils/import-flake.nix { src = ./.; },
   inputs ? self.inputs,
   system ? builtins.currentSystem,
   pkgs ? import inputs.nixpkgs {
