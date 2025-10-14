@@ -36,7 +36,7 @@ lib.makeExtensible (self: {
     ++ aliases;
 
     ci = [
-      toolchains.default
+      self.toolchains.default
       cargo-llvm-cov
     ]
     ++ deps;
