@@ -27,7 +27,9 @@ lib.makeExtensible (self: {
       bacon
       cargo-deny # scan vulnerabilities
       cargo-expand # macro expansion
+      cargo-hack
       cargo-llvm-cov
+      cargo-nextest
       cargo-tarpaulin # code coverage
       cargo-udeps # unused deps
       rainfrog # postgres tui
