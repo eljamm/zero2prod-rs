@@ -25,9 +25,7 @@ lib.makeScope pkgs.newScope (
     rust = callPackage ./nix/rust.nix { };
 
     devShells = rust.shells;
-    crates = rust.crates // {
-      saveFromGC = callPackage ./nix/utils/saveFromGC.nix { };
-    };
+    crates = rust.crates;
 
     flake = {
       inherit devShells;
