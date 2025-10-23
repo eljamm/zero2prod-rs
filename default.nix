@@ -9,8 +9,8 @@
   },
   lib ? import "${inputs.nixpkgs}/lib",
 }:
-lib.makeExtensible (
-  self: with self; {
+lib.makeScope pkgs.newScope (
+  self': with self'; {
     inherit
       lib
       pkgs
@@ -19,15 +19,13 @@ lib.makeExtensible (
       inputs
       ;
 
-    callPackage = pkgs.newScope self;
-
     devLib = callPackage ./nix/lib.nix { };
 
     format = callPackage ./nix/formatter.nix { };
     rust = callPackage ./nix/rust.nix { };
 
     devShells = rust.shells;
-    packages = rust.crates // {
+    crates = rust.crates // {
       saveFromGC = callPackage ./nix/utils/saveFromGC.nix { };
     };
 
@@ -35,7 +33,7 @@ lib.makeExtensible (
       inherit devShells;
       inherit (format) formatter;
       inherit (rust) apps;
-      packages = lib.filterAttrs (n: v: lib.isDerivation v) packages;
+      packages = lib.filterAttrs (n: v: lib.isDerivation v) crates;
       legacyPackages.lib = devLib;
     };
   }
