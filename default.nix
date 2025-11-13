@@ -9,8 +9,8 @@
   },
   lib ? import "${inputs.nixpkgs}/lib",
 }:
-lib.makeScope pkgs.newScope (
-  self': with self'; {
+let
+  scope = lib.makeScope pkgs.newScope (sc: {
     inherit
       lib
       pkgs
@@ -19,20 +19,21 @@ lib.makeScope pkgs.newScope (
       inputs
       ;
 
-    devLib = callPackage ./nix/lib.nix { };
+    devLib = sc.callPackage ./nix/lib.nix { };
 
-    format = callPackage ./nix/formatter.nix { };
-    rust = callPackage ./nix/rust.nix { };
+    format = sc.callPackage ./nix/formatter.nix { };
+    rust = sc.callPackage ./nix/rust.nix { };
 
-    devShells = rust.shells;
-    crates = rust.crates;
+    devShells = sc.rust.shells;
+    crates = sc.rust.crates;
 
     flake = {
-      inherit devShells;
-      inherit (format) formatter;
-      inherit (rust) apps;
-      packages = lib.filterAttrs (n: v: lib.isDerivation v) crates;
-      legacyPackages.lib = devLib;
+      inherit (sc) devShells;
+      inherit (sc.format) formatter;
+      inherit (sc.rust) apps;
+      packages = lib.filterAttrs (n: v: lib.isDerivation v) sc.crates;
+      legacyPackages.lib = sc.devLib;
     };
-  }
-)
+  });
+in
+scope // scope.crates
