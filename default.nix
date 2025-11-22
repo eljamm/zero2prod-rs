@@ -10,30 +10,37 @@
   lib ? import "${inputs.nixpkgs}/lib",
 }:
 let
-  scope = lib.makeScope pkgs.newScope (sc: {
+  scope = lib.makeScope pkgs.newScope (s: {
     inherit
       lib
       pkgs
       self
       system
       inputs
+      flake
       ;
 
-    devLib = sc.callPackage ./nix/lib.nix { };
+    devLib = s.callPackage ./nix/lib.nix { };
 
-    format = sc.callPackage ./nix/formatter.nix { };
-    rust = sc.callPackage ./nix/rust.nix { };
+    format = s.callPackage ./nix/formatter.nix { };
+    rust = s.callPackage ./nix/rust.nix { };
 
-    devShells = sc.rust.shells;
-    crates = sc.rust.crates;
-
-    flake = {
-      inherit (sc) devShells;
-      inherit (sc.format) formatter;
-      inherit (sc.rust) apps;
-      packages = lib.filterAttrs (n: v: lib.isDerivation v) sc.crates;
-      legacyPackages.lib = sc.devLib;
-    };
+    devShells = s.rust.shells;
+    crates = s.rust.crates;
   });
+
+  flake = with scope; {
+    inherit devShells;
+    inherit (format) formatter;
+    inherit (rust) apps;
+    packages = lib.filterAttrs (n: v: lib.isDerivation v) crates;
+    legacyPackages.lib = devLib;
+  };
+
+  # return final attribute set (non-recursive)
+  finalScope = (scope.packages scope) // {
+    # but include the original scope
+    inherit scope;
+  };
 in
-scope // scope.crates
+finalScope // finalScope.flake.packages
