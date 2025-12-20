@@ -1,5 +1,7 @@
 {
   lib,
+  callPackage,
+
   writeShellApplication,
 
   mkShell,
@@ -30,4 +32,6 @@ rec {
     mkShell.override {
       stdenv = useMoldLinker gccStdenv;
     } attrs;
+
+  customScope = callPackage ./utils/custom-scope.nix { };
 }
