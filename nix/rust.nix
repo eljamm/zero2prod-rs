@@ -86,9 +86,7 @@ lib.makeExtensible (self: {
   apps = devLib.mkApps {
     # scan vulnerabilities:
     # nix run .#audit
-    audit = ''
-      ${pkgs.cargo-deny}/bin/cargo-deny check advisories
-    '';
+    audit = "${pkgs.cargo-deny}/bin/cargo-deny check advisories";
   };
 
   shells = {

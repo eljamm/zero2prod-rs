@@ -27,13 +27,17 @@ let
 
     devShells = s.rust.shells;
     crates = s.rust.crates;
+    apps = s.rust.apps;
   });
+
+  flakeLib = inputs.flake-utils.lib;
 
   flake = with scope; {
     inherit devShells;
     inherit (format) formatter;
-    inherit (rust) apps;
+    apps = devLib.filterApps apps;
     packages = lib.filterAttrs (n: v: lib.isDerivation v) crates;
+    checks = flakeLib.filterPackages system (flake.packages // flake.apps);
     legacyPackages.lib = devLib;
   };
 

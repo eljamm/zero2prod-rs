@@ -27,6 +27,13 @@ rec {
       program = attrsToApp name value;
     }) apps;
 
+  filterApps =
+    apps:
+    lib.mapAttrs (_: value: {
+      inherit (value) type;
+      program = lib.getExe value.program;
+    }) apps;
+
   mkShellMold =
     attrs:
     mkShell.override {
