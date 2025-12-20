@@ -2,6 +2,7 @@
   lib,
   default,
   craneLib,
+  ...
 }:
 craneLib.cargoLlvmCov (
   default.commonArgs

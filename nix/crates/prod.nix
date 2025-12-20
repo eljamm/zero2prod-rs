@@ -5,45 +5,11 @@
   postgresql,
   postgresqlTestHook,
   sqlx-cli,
-  openssl,
   writers,
+
+  test-config,
+  commonArgs,
 }:
-let
-  commonArgs = rec {
-    src =
-      let
-        sqlFilter = path: _type: builtins.match ".*sql$" path != null;
-        finalFilter = path: type: (sqlFilter path type) || (craneLib.filterCargoSources path type);
-      in
-      lib.cleanSourceWith {
-        src = ../../.;
-        filter = finalFilter;
-        name = "source";
-      };
-
-    cargoLock = "${src}/Cargo.lock";
-    strictDeps = true;
-
-    nativeBuildInputs = [
-      pkg-config
-    ];
-
-    buildInputs = [
-      openssl
-    ];
-  };
-
-  test-config = {
-    app_port = 8000;
-    database = {
-      name = "newsletter";
-      host = "127.0.0.1";
-      port = 5432;
-      username = "nixbld";
-      password = "password";
-    };
-  };
-in
 craneLib.buildPackage (
   commonArgs
   // {

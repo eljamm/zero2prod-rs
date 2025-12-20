@@ -33,5 +33,5 @@ rec {
       stdenv = useMoldLinker gccStdenv;
     } attrs;
 
-  customScope = callPackage ./utils/custom-scope.nix { };
+  devScope = callPackage ./utils/custom-scope.nix { };
 }

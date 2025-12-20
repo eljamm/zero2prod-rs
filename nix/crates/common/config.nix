@@ -1,0 +1,10 @@
+{
+  app_port = 8000;
+  database = {
+    name = "newsletter";
+    host = "127.0.0.1";
+    port = 5432;
+    username = "nixbld";
+    password = "password";
+  };
+}

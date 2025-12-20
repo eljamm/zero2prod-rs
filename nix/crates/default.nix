@@ -1,26 +1,13 @@
 {
   lib,
+  devLib,
   pkgs,
-  inputs,
-  rust,
   ...
 }:
-lib.makeScope pkgs.newScope (
-  self:
-  let
-    callCrate = self.newScope rec {
-      craneLib = (inputs.crane.mkLib pkgs).overrideToolchain (p: rust.toolchains.default);
+devLib.devScope pkgs.newScope (self: {
+  commonArgs = self.import ./common/args.nix { };
+  test-config = import ./common/config.nix;
 
-      # src -> { `pname`, `version` }
-      crateInfo = src: craneLib.crateNameFromCargoToml { cargoToml = "${src}/Cargo.toml"; };
-
-      # use mold linker
-      stdenv = p: p.stdenvAdapters.useMoldLinker self.clangStdenv;
-    };
-  in
-  {
-    default = callCrate ./prod.nix { };
-
-    coverage = callCrate ./cov.nix { };
-  }
-)
+  default = self.callCrate ./prod.nix { };
+  coverage = self.callCrate ./cov.nix { };
+})
