@@ -4,8 +4,4 @@
 [advisories]
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
-ignore = [
-  # json5 - no longer maintained
-  # https://github.com/rust-cli/config-rs/issues/717
-  { id = "RUSTSEC-2025-0120", reason = "`config` depends on `json5` which is no longer maintained. Upstream decided to stick with it for the time being, as the alternatives are not as mature." },
-]
+ignore = []
